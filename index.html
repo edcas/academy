@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipo - BeePayroll Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="text-2xl font-bold text-blue-600">
+                    <i class="fas fa-graduation-cap mr-2"></i> BeePayroll Academy
+                </div>
+                <div>
+                    <a href="#" class="text-slate-600 hover:text-blue-600">Volver a BeePayroll.com</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="container mx-auto px-6 py-12">
+            <!-- This will be replaced by JS -->
+        </main>
+
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+
+    <script>
+        const appState = {
+            currentPage: 'home',
+            currentSaaSPage: 'docs'
+        };
+
+        const mainContentEl = document.getElementById('main-content');
+        const modalsContainerEl = document.getElementById('modals-container');
+
+        // --- TEMPLATES ---
+
+        function getHomePageTemplate() {
+            return `
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-slate-800">Centro de Conocimiento</h1>
+                    <p class="mt-2 text-lg text-slate-500">Todo lo que necesitas para dominar la nómina y nuestras plataformas.</p>
+                </div>
+
+                <div class="mt-8 max-w-2xl mx-auto">
+                    <div class="relative">
+                        <input type="search" placeholder="Buscar en la documentación, videos y guías..." class="w-full p-4 pl-12 text-lg border border-slate-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    </div>
+                </div>
+
+                <div class="mt-12 grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <!-- SaaS Card -->
+                    <div id="saas-card" class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-all cursor-pointer border border-slate-200">
+                        <i class="fas fa-cloud text-4xl text-blue-500 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-slate-800">Contenido para SaaS</h2>
+                        <p class="mt-2 text-slate-600">Accede a manuales de usuario, tutoriales y guías para nuestra plataforma en la nube.</p>
+                    </div>
+                    <!-- ERP Card -->
+                    <div id="erp-card" class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-all cursor-pointer border border-slate-200">
+                         <i class="fas fa-server text-4xl text-slate-500 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-slate-800">Contenido para ERP</h2>
+                        <p class="mt-2 text-slate-600">Material exclusivo para usuarios internos y clientes específicos. Requiere autorización.</p>
+                    </div>
+                </div>
+
+                <div class="mt-16">
+                    <h3 class="text-2xl font-bold text-center text-slate-800 mb-8">Guías Prácticas Populares</h3>
+                    
+                    <!-- Filter Bar -->
+                    <div class="flex items-center space-x-4 mb-8 max-w-4xl mx-auto">
+                        <label for="tema-filter" class="font-semibold text-slate-700">Tema:</label>
+                        <select id="tema-filter" class="p-2 border border-slate-300 rounded-md bg-white">
+                            <option>Todos los temas</option>
+                            <option>Fiscal</option>
+                            <option>Cumplimiento</option>
+                            <option>IMSS</option>
+                            <option>Mejores Prácticas</option>
+                        </select>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                        ${getGuideCard('RESICO: Todo lo que debes saber', 'https://placehold.co/600x400/3b82f6/ffffff?text=Fiscal', 'Fiscal')}
+                        ${getGuideCard('Manual de IDSE para empresas', 'https://placehold.co/600x400/10b981/ffffff?text=IMSS', 'Cumplimiento')}
+                        ${getGuideCard('Claves para un cálculo de aguinaldo perfecto', 'https://placehold.co/600x400/8b5cf6/ffffff?text=Nómina', 'Mejores Prácticas')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getGuideCard(title, imageUrl, category) {
+            return `
+                <div class="guide-card bg-white rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer border border-slate-200 overflow-hidden flex flex-col">
+                    <img src="${imageUrl}" alt="Portada de la guía ${title}" class="w-full h-40 object-cover">
+                    <div class="p-4 flex flex-col flex-grow">
+                        <p class="text-xs font-semibold text-blue-600 uppercase">${category}</p>
+                        <h4 class="font-bold text-slate-800 mt-1">${title}</h4>
+                        <p class="text-sm text-slate-500 mt-2 flex-grow">Aprende sobre los conceptos clave de la nómina en México con nuestros expertos.</p>
+                        <span class="mt-4 inline-block text-blue-600 font-semibold text-sm">Descargar Guía <i class="fas fa-arrow-right ml-1"></i></span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getSaaSPageTemplate() {
+            const isDocsActive = appState.currentSaaSPage === 'docs';
+            const isVideosActive = appState.currentSaaSPage === 'videos';
+            return `
+                <div>
+                    <button id="back-to-home" class="mb-6 text-sm text-blue-600 font-semibold"><i class="fas fa-arrow-left mr-2"></i> Volver a Academy Home</button>
+                    <div class="flex flex-col md:flex-row -mx-4">
+                        <!-- Sidebar -->
+                        <aside class="w-full md:w-1/4 px-4">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4">Contenido SaaS</h3>
+                            <nav class="flex flex-col space-y-2">
+                                <a href="#" id="docs-link" class="px-4 py-2 rounded-md transition-colors ${isDocsActive ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'}"><i class="fas fa-book w-6 mr-2"></i> Documentación</a>
+                                <a href="#" id="videos-link" class="px-4 py-2 rounded-md transition-colors ${isVideosActive ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'}"><i class="fas fa-video w-6 mr-2"></i> Videotutoriales</a>
+                            </nav>
+                        </aside>
+                        <!-- Content -->
+                        <div id="saas-content-area" class="w-full md:w-3/4 px-4 mt-8 md:mt-0">
+                            <!-- SaaS content will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSaaSContentTemplate() {
+            if(appState.currentSaaSPage === 'docs') {
+                return `
+                    <div class="bg-white p-8 rounded-lg shadow-md border border-slate-200">
+                        <h1 class="text-3xl font-bold text-slate-800">Cómo Realizar el Timbrado de Nómina</h1>
+                        <p class="text-slate-500 mt-2">Última actualización: 25 de junio, 2025</p>
+                        <hr class="my-6">
+                        <div class="prose max-w-none">
+                           <p>El proceso de timbrado es el paso final y más crucial para asegurar el cumplimiento fiscal de tu nómina. Sigue estos pasos para realizarlo correctamente desde la plataforma BeePayroll SaaS.</p>
+                           <h3 class="font-bold">Paso 1: Validar la Prenómina</h3>
+                           <p>Antes de timbrar, asegúrate de que todos los cálculos en la sección de prenómina sean correctos. Revisa las percepciones, deducciones y el neto a pagar de cada empleado.</p>
+                           
+                           <!-- Demo Banner -->
+                           <div class="my-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                               <h4 class="font-bold text-lg text-blue-800">¿Necesitas funcionalidades más avanzadas?</h4>
+                               <p class="mt-1 text-blue-700">Descubre cómo nuestros módulos de nóminas extraordinarias y reportes personalizados pueden potenciar tu gestión.</p>
+                               <button class="mt-4 px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">Solicitar una Demo</button>
+                           </div>
+
+                           <h3 class="font-bold">Paso 2: Ejecutar el Timbrado</h3>
+                           <p>Navega a la pestaña de "Timbrado" y haz clic en el botón "Timbrar Nómina". El sistema se conectará con el SAT para certificar cada recibo. Podrás ver el estado en tiempo real para cada empleado en la tabla.</p>
+                        </div>
+                    </div>
+                `;
+            } else if(appState.currentSaaSPage === 'videos') {
+                 return `
+                    <div class="bg-white p-8 rounded-lg shadow-md border border-slate-200">
+                        <h1 class="text-3xl font-bold text-slate-800">Videotutoriales</h1>
+                        <p class="text-slate-500 mt-2">Guías visuales para dominar la plataforma.</p>
+                        <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${getVideoCard('Configuración Inicial de la Empresa')}
+                            ${getVideoCard('Carga Masiva de Empleados')}
+                            ${getVideoCard('Proceso de Cálculo de Finiquitos')}
+                        </div>
+                         <!-- Demo Banner -->
+                           <div class="mt-10 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                               <h4 class="font-bold text-lg text-blue-800">¿Quieres llevar tu nómina al siguiente nivel?</h4>
+                               <p class="mt-1 text-blue-700">Agenda una demo personalizada y descubre todo el poder de BeePayroll SaaS.</p>
+                               <button class="mt-4 px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">Solicitar una Demo</button>
+                           </div>
+                    </div>
+                 `;
+            }
+        }
+        
+        function getVideoCard(title) {
+            return `
+                <div class="bg-slate-50 rounded-lg overflow-hidden shadow-sm border hover:shadow-md transition-shadow">
+                    <div class="bg-slate-800 aspect-video flex items-center justify-center">
+                        <i class="fas fa-play-circle text-5xl text-white opacity-70"></i>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-semibold text-slate-800">${title}</h4>
+                        <p class="text-sm text-slate-500">Duración: 5:30 min</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getErpModalTemplate() {
+            return `
+                <div id="erp-modal" class="fixed inset-0 z-50 modal-backdrop">
+                    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md m-4">
+                        <h2 class="text-2xl font-bold text-slate-800">Acceso Restringido</h2>
+                        <p class="mt-2 text-slate-600">El contenido del ERP es exclusivo para usuarios autorizados. Por favor, ingresa tu correo para solicitar acceso. Nuestro equipo validará tu solicitud.</p>
+                        <div class="mt-6 space-y-4">
+                             <input type="email" placeholder="tu-correo@empresa.com" class="w-full p-3 border border-slate-300 rounded-md">
+                             <button class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Solicitar Acceso</button>
+                             <button data-close-modal="erp-modal" class="w-full text-center text-sm text-slate-500 hover:text-slate-700">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getGuideModalTemplate() {
+            return `
+                 <div id="guide-modal" class="fixed inset-0 z-50 modal-backdrop">
+                    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg m-4">
+                        <h2 class="text-2xl font-bold text-slate-800">Descarga la Guía</h2>
+                        <p class="mt-2 text-slate-600">Completa tus datos para recibir la guía "RESICO: Todo lo que debes saber" en formato PDF.</p>
+                        <div class="mt-6 grid sm:grid-cols-2 gap-4">
+                            <input type="text" placeholder="Nombre *" class="w-full p-3 border border-slate-300 rounded-md">
+                            <input type="text" placeholder="Apellido *" class="w-full p-3 border border-slate-300 rounded-md">
+                            <input type="email" placeholder="Correo de trabajo *" class="w-full p-3 border border-slate-300 rounded-md sm:col-span-2">
+                            <input type="text" placeholder="Cargo" class="w-full p-3 border border-slate-300 rounded-md">
+                            <input type="text" placeholder="Empresa" class="w-full p-3 border border-slate-300 rounded-md">
+                             <select class="w-full p-3 border border-slate-300 rounded-md text-slate-500 sm:col-span-2">
+                                <option>Número de empleados</option>
+                                <option>1-50</option>
+                                <option>51-100</option>
+                                <option>101-250</option>
+                                <option>251+</option>
+                            </select>
+                        </div>
+                        <div class="mt-6 flex flex-col sm:flex-row-reverse items-center">
+                             <button class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Descargar Guía (PDF)</button>
+                             <button data-close-modal="guide-modal" class="w-full sm:w-auto sm:mr-4 mt-2 sm:mt-0 text-center text-sm text-slate-500 hover:text-slate-700">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // --- RENDER & LOGIC ---
+
+        function render() {
+            if (appState.currentPage === 'home') {
+                mainContentEl.innerHTML = getHomePageTemplate();
+                addHomeListeners();
+            } else if (appState.currentPage === 'saas') {
+                mainContentEl.innerHTML = getSaaSPageTemplate();
+                document.getElementById('saas-content-area').innerHTML = getSaaSContentTemplate();
+                addSaaSListeners();
+            }
+        }
+        
+        function addHomeListeners() {
+            document.getElementById('saas-card').addEventListener('click', () => {
+                appState.currentPage = 'saas';
+                render();
+            });
+            document.getElementById('erp-card').addEventListener('click', () => {
+                modalsContainerEl.innerHTML = getErpModalTemplate();
+                addModalListeners(document.getElementById('erp-modal'));
+            });
+            document.querySelectorAll('.guide-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    modalsContainerEl.innerHTML = getGuideModalTemplate();
+                    addModalListeners(document.getElementById('guide-modal'));
+                });
+            });
+        }
+        
+        function addSaaSListeners() {
+            document.getElementById('back-to-home').addEventListener('click', (e) => {
+                e.preventDefault();
+                appState.currentPage = 'home';
+                render();
+            });
+            document.getElementById('docs-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                if(appState.currentSaaSPage !== 'docs') {
+                    appState.currentSaaSPage = 'docs';
+                    render();
+                }
+            });
+             document.getElementById('videos-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                 if(appState.currentSaaSPage !== 'videos') {
+                    appState.currentSaaSPage = 'videos';
+                    render();
+                }
+            });
+        }
+
+        function addModalListeners(modalEl) {
+             modalEl.querySelectorAll('[data-close-modal]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modalEl.remove();
+                });
+             });
+        }
+
+        // Initial render
+        render();
+
+    </script>
+
+</body>
+</html>
